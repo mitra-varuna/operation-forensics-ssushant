@@ -1,2 +1,6 @@
 *.pyc
-
+*.json
+*.so
+*.zip
+*.jar
+*.tar.gz
