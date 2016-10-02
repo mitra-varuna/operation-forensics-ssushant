@@ -1,6 +1,4 @@
-application: operation-forensics-ssushant
-version: alpha-1
-runtime: python27
+bnruntime: python27
 api_version: 1
 threadsafe: true
 
