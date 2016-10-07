@@ -9,7 +9,7 @@ import logging
 
 DISCOVERY_URL = ('https://{api}.googleapis.com/'
                  '$discovery/rest?version={apiVersion}')
-URLS = ['http://www.thehindu.com/opinion/lead/rakesh-sood-writes-on-the-aftermath-of-uri-terror-attacks-uri-as-inflection-point/article9169396.ece']
+URLS = ['http://www.thehindu.com/opinion/editorial/a-nobel-push-for-peace-in-colombia/article9198670.ece']
 http = httplib2.Http()
 credentials = GoogleCredentials.get_application_default().create_scoped(
 ['https://www.googleapis.com/auth/cloud-platform']
@@ -27,13 +27,20 @@ def get_sentiment(doc):
              "extractSyntax": False,
              "extractEntities": True,
              "extractDocumentSentiment": True,
-          }
+          },
+          'encodingType':'UTF32'
     })
     response = service_request.execute()
     logging.error("Response from api {0}".format(response))
     polarity = response['documentSentiment']['polarity']
     magnitude = response['documentSentiment']['magnitude']
-    return response
+    entities = []
+    for r in response['entities']:
+        wikipedia_url = None
+        if 'wikipedia_url'in r['metadata']:
+            wikipedia_url = r['metadata']['wikipedia_url']
+        entities.append(dict(salience=r['salience'], mention_type=r['type'],url=wikipedia_url, name=r['name']))
+    return dict(polarity=polarity, magnitude=magnitude, entities=entities)
 
 
 def index():
@@ -42,11 +49,14 @@ def index():
         try:
             result = urlfetch.fetch(url)
             if result.status_code == 200:
-                content = ''.join((p.text for p in BeautifulSoup(result.content).findAll('p',{'class':'body'})))
-                content = content.replace('\n','')
+                content = hindu_strategy(result.content)
                 response.append(get_sentiment(content))
             else:
                 return {}
         except urlfetch.Error:
             logging.exception('Caught exception fetching url')
     return response
+
+def hindu_strategy(html_doc):
+    content = ''.join((p.text for p in BeautifulSoup(html_doc).findAll('p',{'class':'body'})))
+    return content.replace('\n','')
