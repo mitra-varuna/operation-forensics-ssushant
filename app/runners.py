@@ -1,4 +1,4 @@
-from .models import OpSummary
+from .models import OpSummary, Entity
 from google.appengine.api import urlfetch
 from googleapiclient import discovery
 import httplib2
@@ -37,7 +37,7 @@ def get_sentiment(doc):
     entities = []
     for r in response['entities']:
         wikipedia_url = None
-        if 'wikipedia_url'in r['metadata']:
+        if 'wikipedia_url' in r['metadata']:
             wikipedia_url = r['metadata']['wikipedia_url']
         entities.append(dict(salience=r['salience'], mention_type=r['type'],url=wikipedia_url, name=r['name']))
     return dict(polarity=polarity, magnitude=magnitude, entities=entities)
@@ -49,14 +49,25 @@ def index():
         try:
             result = urlfetch.fetch(url)
             if result.status_code == 200:
-                content = hindu_strategy(result.content)
-                response.append(get_sentiment(content))
+                content = hindu_strategy(url, result)
+                #response.append(get_sentiment(content))
             else:
                 return {}
         except urlfetch.Error:
             logging.exception('Caught exception fetching url')
     return response
+    # return hindu_strategy(None, None)
 
-def hindu_strategy(html_doc):
-    content = ''.join((p.text for p in BeautifulSoup(html_doc).findAll('p',{'class':'body'})))
-    return content.replace('\n','')
+def all_articles():
+    return [f.to_dict(exclude=['date']) for f in OpSummary.query().fetch()]
+
+
+def hindu_strategy(url, result):
+    html_doc = result.content
+    bs = BeautifulSoup(html_doc)
+    content = ''.join((p.text for p in bs.findAll('p',{'class':'body'})))
+    summary = bs.findAll('h1', {'class':'detail-title'})[0].text
+    analyse = get_sentiment(content.replace('\n',''))
+    entities = [Entity(photo_url=None, wikipedia_url=r['url'], name=r['name'],mention_type=r['mention_type'],salience=r['salience']) for r in analyse['entities']]
+    ops = OpSummary(url=url, summary=summary, polarity=analyse['polarity'], entities=entities,magnitude=analyse['magnitude'])
+    ops.put()
