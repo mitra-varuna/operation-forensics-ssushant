@@ -1,5 +1,5 @@
 import webapp2
-from app.runners import index, all_articles, feed_index
+from app.runners import all_articles, feed_index
 import json
 
 class DatetimeEncoder(json.JSONEncoder):
