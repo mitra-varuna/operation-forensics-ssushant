@@ -1,9 +1,6 @@
 from .models import OpSummary, Entity
 from google.appengine.api import urlfetch
-from googleapiclient import discovery
-import httplib2
 import json
-from oauth2client.client import GoogleCredentials
 from bs4 import BeautifulSoup
 import logging
 import sentiments

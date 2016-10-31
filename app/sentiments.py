@@ -1,4 +1,8 @@
 
+from oauth2client.client import GoogleCredentials
+from googleapiclient import discovery
+import httplib2
+
 DISCOVERY_URL = ('https://{api}.googleapis.com/'
                  '$discovery/rest?version={apiVersion}')
 URLS = ['http://www.thehindu.com/opinion/editorial/a-nobel-push-for-peace-in-colombia/article9198670.ece']
