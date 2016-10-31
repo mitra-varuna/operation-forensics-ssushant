@@ -1,5 +1,5 @@
 import webapp2
-from app.runners import index, all_articles
+from app.runners import index, all_articles, feed_index
 import json
 
 class DatetimeEncoder(json.JSONEncoder):
@@ -11,7 +11,7 @@ class DatetimeEncoder(json.JSONEncoder):
 
 class IndexPage(webapp2.RequestHandler):
     def get(self):
-        index()
+        feed_index()
         self.response.write("Articles indexed for today")
 
 class GetSentiment(webapp2.RequestHandler):

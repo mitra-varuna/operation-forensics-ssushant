@@ -2,6 +2,8 @@
 from oauth2client.client import GoogleCredentials
 from googleapiclient import discovery
 import httplib2
+import logging
+
 
 DISCOVERY_URL = ('https://{api}.googleapis.com/'
                  '$discovery/rest?version={apiVersion}')
