@@ -3,8 +3,8 @@ import logging
 from google.appengine.api import urlfetch
 
 import sentiments
-from bs4 import BeautifulSoup
 from datastore_helper import update_datastore
+from editorial_helper import get_editorial_content
 from .models import OpSummary
 
 FEEDS = ['http://www.thehindu.com/opinion/?service=rss']
@@ -35,7 +35,6 @@ def all_articles():
 
 def hindu_strategy(url, result, summary):
     html_doc = result.content
-    bs = BeautifulSoup(html_doc)
-    content = ''.join((p.text for p in bs.findAll('p',{'class':'body'})))
-    analyse = sentiments.get_sentiment(content.replace('\n',''))
+    content = get_editorial_content(html_doc)
+    analyse = sentiments.get_sentiment(content)
     update_datastore(analyse, summary, url)
