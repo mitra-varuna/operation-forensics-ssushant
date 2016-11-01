@@ -1,9 +1,11 @@
-from .models import OpSummary, Entity
-from google.appengine.api import urlfetch
 import json
-from bs4 import BeautifulSoup
 import logging
+
+from google.appengine.api import urlfetch
+
 import sentiments
+from bs4 import BeautifulSoup
+from .models import OpSummary, Entity
 
 FEEDS = ['http://www.thehindu.com/opinion/?service=rss']
 
@@ -22,7 +24,7 @@ def parse_single_url(url, summary):
             content = hindu_strategy(url, result, summary)
         else:
             return {}
-    except urlfetch.Error:
+    except urlfetch.Error as e:
         logging.exception('Caught exception fetching url')
 
 def all_articles():
@@ -33,10 +35,14 @@ def hindu_strategy(url, result, summary):
     html_doc = result.content
     bs = BeautifulSoup(html_doc)
     content = ''.join((p.text for p in bs.findAll('p',{'class':'body'})))
-    #summary = bs.findAll('h1', {'class':'detail-title'})[0].text
     analyse = sentiments.get_sentiment(content.replace('\n',''))
-    entities = [Entity(photo_url=get_wikipedia_image(r['url']), wikipedia_url=r['url'], name=r['name'],mention_type=r['mention_type'],salience=r['salience']) for r in analyse['entities']]
-    ops = OpSummary(url=url, summary=summary, polarity=analyse['polarity'], entities=entities,magnitude=analyse['magnitude'])
+    entities = [Entity(photo_url=get_wikipedia_image(response['url']),
+                       wikipedia_url=response['url'],
+                       name=response['name'],
+                       mention_type=response['mention_type'], salience=response['salience']) for response in
+                analyse['entities']]
+    ops = OpSummary(url=url, summary=summary, polarity=analyse['polarity'], entities=entities,
+                    magnitude=analyse['magnitude'])
     ops.put()
 
     
@@ -44,10 +50,10 @@ def get_wikipedia_image(wikipedia_url):
     title = get_title(wikipedia_url)
     logging.info("Got the title {0}".format(title))
     if title:
-        images = get_image(title)
-        logging.info("Got the images {0}".format(images))
-        if images:
-            return images
+        image_url = get_image(title)
+        logging.info("Got the images {0}".format(image_url))
+        if image_url:
+            return image_url
         else:
             return None
     else:
@@ -68,9 +74,10 @@ def get_image(title):
     try:
         json_info = urlfetch.fetch(url)
         info = json.loads(json_info.content)
-        for  i in info['query']['pages'].values():
-            if 'thumbnail' in i:
-                image_url = i['thumbnail']['original']
+        for thumbnail_info in info['query']['pages'].values():
+            if 'thumbnail' in thumbnail_info:
+                image_url = thumbnail_info['thumbnail']['original']
                 return image_url
-    except Exception:
+    except Exception as e:
+        logging.exception("Exception occured when getting wikipedia thumbanil for {0}".format(title))
         return None
