@@ -18,5 +18,5 @@ class OpSummary(ndb.Model):
 
     @classmethod
     def get_today_articles(cls):
-        OpSummary.query().order(-OpSummary.polarity). \
-            fetch(projection=[OpSummary.summary, OpSummary.url, OpSummary.polarity, OpSummary.magnitude])
+        OpSummary.query(projection=[OpSummary.summary, OpSummary.url, OpSummary.polarity, OpSummary.magnitude]). \
+            fetch()

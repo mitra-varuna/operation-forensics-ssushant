@@ -1,5 +1,7 @@
 import logging
+from time import mktime
 
+from datetime import datetime
 from google.appengine.api import urlfetch
 
 import sentiments
@@ -14,7 +16,7 @@ def feed_index():
     for feed in FEEDS:
         parsed_feed = feedparser.parse(feed)
         for entry in parsed_feed.entries:
-            parse_single_url(entry.link, entry.description, entry.published_parsed)
+            parse_single_url(entry.link, entry.description, datetime.fromtimestamp(mktime(entry.published_parsed)))
 
 
 def parse_single_url(url, summary, when):

@@ -6,8 +6,8 @@ def update_datastore(analyse, summary, url, when):
     entities = [Entity(photo_url=get_wikipedia_image(response['url']),
                        wikipedia_url=response['url'],
                        name=response['name'],
-                       mention_type=response['mention_type'], salience=response['salience'], when=when) for response in
+                       mention_type=response['mention_type'], salience=response['salience']) for response in
                 analyse['entities']]
     ops = OpSummary(url=url, summary=summary, polarity=analyse['polarity'], entities=entities,
-                    magnitude=analyse['magnitude'])
+                    magnitude=analyse['magnitude'], when=when)
     ops.put()
