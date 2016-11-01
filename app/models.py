@@ -1,4 +1,3 @@
-import datetime
 from google.appengine.ext import ndb
 
 class Entity(ndb.Model):
@@ -19,5 +18,5 @@ class OpSummary(ndb.Model):
 
     @classmethod
     def get_today_articles(cls):
-        OpSummary.query(OpSummary.when == datetime.date.today()).order(-OpSummary.polarity). \
+        OpSummary.query().order(-OpSummary.polarity). \
             fetch(projection=[OpSummary.summary, OpSummary.url, OpSummary.polarity, OpSummary.magnitude])

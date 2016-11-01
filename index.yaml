@@ -1,0 +1,9 @@
+indexes:
+
+- kind: OpSummary
+  properties:
+   - name: polarity
+     direction: desc
+   - name: magnitude
+   - name: summary
+   - name: url
