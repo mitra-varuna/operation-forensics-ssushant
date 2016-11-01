@@ -1,1 +1,4 @@
 cron:
+- description: Index editorial pages
+  url: /index
+  schedule: every 24 hours
