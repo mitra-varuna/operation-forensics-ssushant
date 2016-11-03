@@ -2,6 +2,7 @@ indexes:
 
 - kind: OpSummary
   properties:
+   - name: when
    - name: polarity
      direction: desc
    - name: magnitude
